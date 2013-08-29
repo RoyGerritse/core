@@ -99,8 +99,6 @@ if ($needUpgrade) {
 	OCP\Util::addscript('files', 'files');
 	OCP\Util::addscript('files', 'keyboardshortcuts');
 	$tmpl = new OCP\Template('files', 'index', 'user');
-	$tmpl->assign('fileList', $list->fetchPage());
-	$tmpl->assign('breadcrumb', $breadcrumbNav->fetchPage());
 	$tmpl->assign('dir', \OC\Files\Filesystem::normalizePath($dir));
 	$tmpl->assign('isCreatable', \OC\Files\Filesystem::isCreatable($dir . '/'));
 	$tmpl->assign('permissions', $permissions);

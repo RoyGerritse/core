@@ -47,9 +47,6 @@ $list->assign('downloadURL', OCP\Util::linkTo('files_trashbin', 'download.php') 
 $list->assign('dirlisting', $dirlisting);
 $list->assign('disableDownloadActions', true);
 
-$tmpl->assign('dirlisting', $dirlisting);
-$tmpl->assign('breadcrumb', $breadcrumbNav->fetchPage());
-$tmpl->assign('fileList', $list->fetchPage());
 $tmpl->assign('files', $files);
 $tmpl->assign('dir', $dir);
 $tmpl->assign('disableSharing', true);

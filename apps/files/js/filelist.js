@@ -845,31 +845,32 @@ $(document).ready(function(){
 		$(window).trigger('beforeunload');
 	});
 
-	function parseHashQuery(){
+	function parseQuery(){
 		var hash = window.location.hash,
 			pos = hash.indexOf('?'),
 			query;
 		if (pos >= 0){
 			return hash.substr(pos + 1);
 		}
-		return '';
+		return location.search;
 	}
 
-	function initFromHash(){
+	function loadFiles(){
 		// when initializing, there might be a hash already set (if the user refreshed the browser page)
 		// so use that and change the directory directly
-		var query = parseHashQuery(),
+		var query = parseQuery(),
 			targetDir;
 		if (query){
 			targetDir = (OC.parseQueryString(query) || {dir: '/'}).dir || '/';
-			FileList.changeDirectory(targetDir, false);
+			FileList.setCurrentDir(targetDir, false);
 		}
+		FileList.reload();
 	}
 
 	// fallback to hashchange when no history support
 	if (!window.history.pushState){
 		$(window).on('hashchange', function(){
-			var query = parseHashQuery(),
+			var query = parseQuery(),
 				targetDir;
 			if (query){
 				targetDir = (OC.parseQueryString(query) || {dir: '/'}).dir || '/';
@@ -889,7 +890,8 @@ $(document).ready(function(){
 		}
 	}
 
-	initFromHash();
+	// first time file list loading
+	loadFiles();
 
 	FileList.createFileSummary();
 });
