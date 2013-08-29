@@ -171,12 +171,20 @@ var FileList={
 		FileList.setCurrentDir(targetDir, changeUrl);
 		FileList.reload();
 	},
+	linkTo: function(dir){
+		return OC.linkTo('files', 'index.php')+"?dir="+ encodeURIComponent(dir).replace(/%2F/g, '/');
+	},
 	setCurrentDir: function(targetDir, changeUrl){
 		$('#dir').val(targetDir);
-		// Note: IE8 handling ignored for now
-		if (window.history.pushState && changeUrl !== false){
-			url = OC.linkTo('files', 'index.php')+"?dir="+ encodeURIComponent(targetDir).replace(/%2F/g, '/'),
-			window.history.pushState({dir: targetDir}, '', url);
+		if (changeUrl !== false){
+			if (window.history.pushState && changeUrl !== false){
+				url = FileList.linkTo(targetDir);
+				window.history.pushState({dir: targetDir}, '', url);
+			}
+			// use URL hash for IE8
+			else{
+				window.location.hash = '?dir='+ encodeURIComponent(targetDir).replace(/%2F/g, '/');
+			}
 		}
 	},
 	/**
@@ -837,6 +845,38 @@ $(document).ready(function(){
 		$(window).trigger('beforeunload');
 	});
 
+	function parseHashQuery(){
+		var hash = window.location.hash,
+			pos = hash.indexOf('?'),
+			query;
+		if (pos >= 0){
+			return hash.substr(pos + 1);
+		}
+		return '';
+	}
+
+	function initFromHash(){
+		// when initializing, there might be a hash already set (if the user refreshed the browser page)
+		// so use that and change the directory directly
+		var query = parseHashQuery(),
+			targetDir;
+		if (query){
+			targetDir = (OC.parseQueryString(query) || {dir: '/'}).dir || '/';
+			FileList.changeDirectory(targetDir, false);
+		}
+	}
+
+	// fallback to hashchange when no history support
+	if (!window.history.pushState){
+		$(window).on('hashchange', function(){
+			var query = parseHashQuery(),
+				targetDir;
+			if (query){
+				targetDir = (OC.parseQueryString(query) || {dir: '/'}).dir || '/';
+				FileList.changeDirectory(targetDir, false);
+			}
+		});
+	}
 	window.onpopstate = function(e){
 		var targetDir;
 		if (e.state && e.state.dir){
@@ -845,11 +885,11 @@ $(document).ready(function(){
 		else{
 			// read from URL
 			targetDir = (OC.parseQueryString(location.search) || {dir: '/'}).dir || '/';
-		}
-		if (targetDir){
 			FileList.changeDirectory(targetDir, false);
 		}
 	}
+
+	initFromHash();
 
 	FileList.createFileSummary();
 });
