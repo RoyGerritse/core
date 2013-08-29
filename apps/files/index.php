@@ -41,6 +41,15 @@ if (!\OC\Files\Filesystem::is_dir($dir . '/')) {
 	exit();
 }
 
+// if IE8, reformat URL to use hash
+if ($dir !== '' && $dir !== '/'){
+	preg_match('/MSIE (.*?);/', $_SERVER['HTTP_USER_AGENT'], $matches);
+	if (count($matches) > 0 && $matches[1] <= 8){
+		header('Location: ' . OCP\Util::linkTo('files', 'index.php') . '#?dir=' . \OCP\Util::encodePath($dir));
+		exit();
+	}
+}
+
 $files = array();
 $user = OC_User::getUser();
 if (\OC\Files\Cache\Upgrade::needUpgrade($user)) { //dont load anything if we need to upgrade the cache
